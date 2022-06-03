@@ -1,6 +1,7 @@
 const router = require('express').Router();
 const swaggerJsdoc = require('swagger-jsdoc');
 const swaggerUi = require('swagger-ui-express');
+const blogController = require('../controllers/blog.controller');
 
 const { app, port, isProd } = require('../config');
 
@@ -36,5 +37,7 @@ const specs = swaggerJsdoc(swaggerOptions);
 // if (!isProd) {
 router.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs));
 // }
+
+router.use('/blogs', blogController);
 
 module.exports = router;
