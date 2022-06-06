@@ -2,6 +2,7 @@ const router = require('express').Router();
 const swaggerJsdoc = require('swagger-jsdoc');
 const swaggerUi = require('swagger-ui-express');
 const blogController = require('../controllers/blog.controller');
+const userController = require('../controllers/user.controller');
 
 const { app, port, isProd } = require('../config');
 
@@ -39,5 +40,6 @@ router.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs));
 // }
 
 router.use('/blogs', blogController);
+router.use('/users', userController);
 
 module.exports = router;

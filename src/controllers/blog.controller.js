@@ -2,14 +2,17 @@ const router = require('express').Router();
 
 const Blog = require('../models/blog.model');
 
-const oldBlogs = [];
-
 router.get('/', async(req, res) => {
+  const { page = 1, limit = 10 } = req.query;
+
   try {
-    const blogs = await Blog.query();
+    const blogs = await Blog.query().withGraphJoined('users').page(page - 1, limit);
 
     return res.success('SUCCESS', '', {
-      blogs
+      blogs: blogs.results,
+      total: blogs.total,
+      page: Number(page),
+      limit: Number(limit),
     });
     
   } catch (error) {
@@ -17,56 +20,51 @@ router.get('/', async(req, res) => {
   }
 });
 
-router.get('/:id', (req, res) => {
+router.get('/:id', async (req, res) => {
   const { id } = req.params;
-  const blog = oldBlogs.find(b => b.id === Number(id));
+  try {
+    const blog = await Blog.query().findById(id);
 
-  if (!blog) {
-    return res.error('NOT_FOUND');
+    if (!blog) return res.error('NOT_FOUND');
+
+    return res.success('SUCCESS', '', {
+      blog
+    })
+  } catch (error) {
+    return res.error('OBJECTION_ERROR', error);
   }
-
-  return res.success('SUCCESS', '', blog);
 });
 
-router.post('/', (req, res) =>  {
-  const { title, body } = req.body;
-  const blog = {
-    id: oldBlogs.length + 1,
-    title,
-    body,
-  };
-
-  oldBlogs.push(blog);
-
-  return res.success('CREATED', '', blog);
+router.post('/', async (req, res) =>  {
+  try {
+    const blog = await Blog.query().insert(req.body);
+    return res.success('CREATED', '', { blog });
+  } catch (error) {
+    return res.error('OBJECTION_ERROR', error);
+  }
 });
 
-router.delete('/:id', (req, res) => {
+router.delete('/:id', async (req, res) => {
   const { id } = req.params;
-  const blog = oldBlogs.find(b => b.id === Number(id));
-
-  if (!blog) {
-    return res.error('NOT_FOUND');
+  
+  try {
+    const count = await Blog.query().deleteById(id);
+    return res.success('SUCCESS', '', { count }); 
+  } catch (error) {
+    return res.error('OBJECTION_ERROR', error);
   }
-
-  oldBlogs.splice(oldBlogs.indexOf(blog), 1);
-
-  return res.success('SUCCESS', '', blog);
 })
 
-router.put('/:id', (req, res) => {
+router.put('/:id', async(req, res) => {
   const { id } = req.params;
-  const { title, body } = req.body;
-  const blog = oldBlogs.find(b => b.id === Number(id));
 
-  if (!blog) {
-    return res.error('NOT_FOUND');
+  try {
+    const blog = await Blog.query().findById(id).patchAndFetchById(id, req.body);
+    return res.success('UPDATED', '', { blog });    
+  } catch (error) { 
+    return res.error('OBJECTION_ERROR', error);
   }
 
-  blog.title = title;
-  blog.body = body;
-
-  return res.success('UPDATED', '', blog);
 })
 
 module.exports = router;
