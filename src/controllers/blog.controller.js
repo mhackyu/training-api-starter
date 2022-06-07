@@ -2,6 +2,34 @@ const router = require('express').Router();
 
 const Blog = require('../models/blog.model');
 
+/**
+ * @swagger
+ * tags:
+ *  name: Blogs
+ *  description: Blog management
+ */
+
+/**
+ * @swagger
+ * /blogs/:
+ *   get:
+ *     tags: [Blogs]
+ *     description: Get All Blogs
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *         description: Page number
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *         description: Limit per page
+ *     responses:
+ *      200:
+ *        description: Success
+ */
 router.get('/', async(req, res) => {
   const { page = 1, limit = 10 } = req.query;
 
@@ -34,6 +62,24 @@ router.get('/:id', async (req, res) => {
     return res.error('OBJECTION_ERROR', error);
   }
 });
+
+
+/**
+ * @swagger
+ * /blogs/:
+ *   post:
+ *     tags: [Blogs]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/Blog'
+ *     description: Create a new blog
+ *     responses:
+ *       201:
+ *         description: Successfully created
+ */
 
 router.post('/', async (req, res) =>  {
   try {

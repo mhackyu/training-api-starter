@@ -8,6 +8,7 @@ const { port, responseTypes, corsConfig } = require('./src/config');
 const { logger } = require('./src/lib');
 const responseMiddleware = require('./src/middlewares/response.middleware');
 const apiRoutes = require('./src/routes');
+const blogWorker = require('./src/workers/blog.worker');
 
 const app = express();
 
@@ -69,3 +70,5 @@ app.listen(port, () => {
   // eslint-disable-next-line no-console
   console.log(`Listening to http://localhost:${port}`);
 });
+
+// blogWorker.start();
